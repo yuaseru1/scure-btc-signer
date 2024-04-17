@@ -150,7 +150,16 @@ function estimateInput(
           for (let i = 0; i < n; i++) signatures.push(P.EMPTY);
         } else if (outScript.type === 'tr_ns') {
           for (const _pub of outScript.pubkeys) signatures.push(new Uint8Array(SCHNORR_SIG_SIZE));
-        } else throw new Error('Finalize: Unknown tapLeafScript');
+        } else if (
+          _script[0] == 32 &&
+          _script[33] == 172 &&
+          _script[34] == 0 &&
+          _script[35] == 99
+        ) {
+          signatures.push(new Uint8Array(SCHNORR_SIG_SIZE));
+        } else {
+          throw new Error('Finalize: Unknown tapLeafScript');
+        }
         // Witness is stack, so last element will be used first
         witness = signatures.reverse().concat([script, psbt.TaprootControlBlock.encode(cb)]);
         break;
